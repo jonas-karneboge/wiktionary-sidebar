@@ -2,15 +2,13 @@
  * Wiktionary Sidebar – Obsidian Community Plugin
  * Datei: src/main.ts
  *
- * Parser-Varianten (per API-Inspektion bestätigt):
- *
- *  DE  – heading3=Wortart, p=Label, dl>dd=Inhalt
- *  FR  – heading3=Wortart, ol>li=Definitionen, heading4=Sub-Label mit ul>li
- *  IT  – heading3=Wortart, ol>li=Definitionen, weitere heading3=Sub-Label mit ul>li
- *  SV  – heading3=Wortart, ol>li=Definitionen, heading4=Sub-Label (ignoriert)
- *  EN  – heading4=Wortart, ol>li=Definitionen, heading5=Sub-Label mit ul>li
- *  NL  – heading4=Wortart, ol>li=Definitionen, heading5=Sub-Label mit ul>li
- *  ES  – heading3=Etymologie → heading4=Wortart, dl>dd=Inhalt (dt=Nummern, ignoriert)
+ *  DE  – heading3=word class, p=label, dl>dd=content
+ *  FR  – heading3=word class, ol>li=definitions, heading4=sub-label with ul>li
+ *  IT  – heading3=word class, ol>li=definitions, weitere heading3=sub-label with ul>li
+ *  SV  – heading3=word class, ol>li=definitions, heading4=sub-label (ignored)
+ *  EN  – heading4=word class, ol>li=definitions, heading5=sub-label with ul>li
+ *  NL  – heading4=word class, ol>li=definitions, heading5=sub-label with ul>li
+ *  ES  – heading3=etymology → heading4=word class, dl>dd=content (dt=numbers, ignored)
  */
 
 import {
@@ -52,7 +50,7 @@ interface PosBlock {
 
 type WiktionarySettings = Record<string, boolean>;
 
-// ── Sprachkonfiguration ──────────────────────────────────────────────────────
+// ── Language settings ──────────────────────────────────────────────────────
 
 const LANGUAGES: LangConfig[] = [
 	{ code: "de", label: "Deutsch",    apiLang: "de", sectionName: "Deutsch",    wikiUrl: "https://de.wiktionary.org/wiki/", defaultOn: true,  variant: "DE"     },
@@ -89,7 +87,7 @@ async function fetchWiktionaryHTML(word: string, apiLang: string): Promise<strin
 	}
 }
 
-// ── Parser-Hilfsfunktionen ───────────────────────────────────────────────────
+// ── Parser helper functions ───────────────────────────────────────────────────
 
 function headingText(el: Element): string {
 	const clone = el.cloneNode(true) as Element;
@@ -108,7 +106,7 @@ function cleanText(el: Element, removeNested = false): string {
 	return stripLineNumbers(clone.textContent?.trim() ?? "");
 }
 
-/** Alle <li>-Kinder eines <ol> oder <ul> als Texte. Verschachtelte Listen werden entfernt. */
+/** All <li>-children of a <ol> or <ul> as text. Nested lists are removed. */
 function listItems(el: Element): string[] {
 	const items: string[] = [];
 	const children = el.children;
@@ -122,20 +120,20 @@ function listItems(el: Element): string[] {
 	return items;
 }
 
-/** Alle <dd>-Kinder eines <dl> als Texte. <dt>-Elemente werden ignoriert (Nummern bei ES). */
+/** All <dd>-children of a  <dl> as text. <dt>-elements are ignored (numbers in ES) */
 function dlItems(el: Element): string[] {
 	const items: string[] = [];
 	const children = el.children;
 	for (let i = 0; i < children.length; i++) {
 		const child = children[i];
 		if (child.tagName.toLowerCase() !== "dd") continue;
-		const text = cleanText(child, true); // true = verschachtelte Listen entfernen
+		const text = cleanText(child, true); // true = remove nested lists
 		if (text.length > 0) items.push(text);
 	}
 	return items;
 }
 
-/** Findet den Startpunkt eines Sprachblocks anhand des sectionName. */
+/** Finds the starting point of a language block based on the sectionName. */
 function findBlockStart(doc: Document, sectionName: string): Element | null {
 	const h2list = doc.querySelectorAll("div.mw-heading2");
 	for (let i = 0; i < h2list.length; i++) {
@@ -146,7 +144,7 @@ function findBlockStart(doc: Document, sectionName: string): Element | null {
 
 // ── Parser DE ─────────────────────────────────────────────────────────────────
 //
-// heading3 = Wortart
+// heading3 = word class
 // p        = Sub-Label (z. B. „Bedeutungen:", „Synonyme:")
 // dl > dd  = Eintragszeile
 
@@ -199,9 +197,9 @@ function parseDE(doc: Document): PosBlock[] {
 	return posList;
 }
 
-// ── Meta-Heading-Listen ───────────────────────────────────────────────────────
-// Heading-Texte die KEINE Wortarten sind, sondern Meta-Abschnitte.
-// Alles was nicht in der Liste steht wird als Wortart interpretiert.
+// ── Meta heading lists ───────────────────────────────────────────────────────
+// Heading texts that are NOT types of words, but meta-sections.
+// Anything not included in the list is treated as a word type.
 
 const META_H3_FR_IT_SV = new Set([
 	// FR
@@ -216,7 +214,7 @@ const META_H3_FR_IT_SV = new Set([
 ]);
 
 const META_H3_EN_NL = new Set([
-	// EN – nummerierte Etymologien
+	// EN – numbered etymologies
 	"Etymology", "Etymology 1", "Etymology 2", "Etymology 3", "Etymology 4",
 	"Pronunciation", "Further reading", "References", "See also",
 	"Alternative forms",
@@ -238,16 +236,15 @@ const META_H4_EN_NL = new Set([
 
 
 //
-// heading3 = Wortart (und bei IT auch Sub-Labels wie „Sinonimi", „Contrari")
-// ol > li  = Definitionen (direkt nach heading3)
-// heading4 = Sub-Label (FR/SV) oder ignoriert
+// heading3 = Word type (and, in IT, sub-labels such as „Sinonimi", „Contrari")
+// ol > li  = Definitions (immediately after heading3)
+// heading4 = Sub-label (FR/SV) or ignored
 
 function parseFR_IT_SV(doc: Document, sectionName: string): PosBlock[] {
 	const blockStart = findBlockStart(doc, sectionName);
 	if (!blockStart) return [];
 
-	// Welche heading3-Texte sind Wortarten (keine Meta-Abschnitte)?
-	// → META_H3_FR_IT_SV (Modul-Konstante oben)
+	// → META_H3_FR_IT_SV (module constant above)
 
 	const posList: PosBlock[] = [];
 	let currentPOS: PosBlock | null = null;
@@ -289,7 +286,7 @@ function parseFR_IT_SV(doc: Document, sectionName: string): PosBlock[] {
 				currentPOS = { partOfSpeech: text, subSections: [] };
 			}
 		} else if (cls.includes("mw-heading4")) {
-			// FR/SV: heading4 als Sub-Label — nur wenn folgendes ul/ol Inhalt hat
+			// FR/SV: heading4 as a sub-label — only if the following contains ul/ol elements
 			if (currentPOS) {
 				flushSub();
 				const next = el.nextElementSibling;
@@ -304,8 +301,8 @@ function parseFR_IT_SV(doc: Document, sectionName: string): PosBlock[] {
 				}
 			}
 		} else if (currentPOS && (tag === "ol" || tag === "ul")) {
-			// Definitionen direkt nach heading3 (kein vorheriges Sub-Label)
-			// Nur wenn noch kein currentSub läuft
+			// Definitions immediately following heading3 (no preceding sub-label)
+			// Only if no currentSub is already running
 			if (!currentSub) {
 				currentSub = { label: null, items: listItems(el) };
 			}
@@ -319,16 +316,16 @@ function parseFR_IT_SV(doc: Document, sectionName: string): PosBlock[] {
 
 // ── Parser EN / NL ────────────────────────────────────────────────────────────
 //
-// heading4 = Wortart (heading3 = Etymology / meta)
-// ol > li  = Definitionen
-// heading5 = Sub-Label (Synonyms, Hypernyms, …) mit ul > li
+// heading4 = Word type (heading3 = Etymology / meta)
+// ol > li  = definitions
+// heading5 = Sub-label (Synonyms, Hypernyms, …) with ul > li
 
 function parseEN_NL(doc: Document, sectionName: string): PosBlock[] {
 	const blockStart = findBlockStart(doc, sectionName);
 	if (!blockStart) return [];
 
-	// heading3-Texte die KEINE Wortarten sind → META_H3_EN_NL
-	// heading4-Texte die KEINE Wortarten sind → META_H4_EN_NL
+	// heading3 text that is NOT a word type → META_H3_EN_NL
+	// heading4 text that is NOT a word type → META_H4_EN_NL
 
 	const posList: PosBlock[] = [];
 	let currentPOS: PosBlock | null = null;
@@ -356,22 +353,22 @@ function parseEN_NL(doc: Document, sectionName: string): PosBlock[] {
 				// Meta-Sektion: POS flushen, keinen neuen anlegen
 				flushPOS();
 			} else {
-				// Wortart direkt auf heading3-Ebene (z. B. „Noun" bei autonomy)
+				// Word type directly at heading3 level (e.g. „Noun")
 				flushPOS();
 				currentPOS = { partOfSpeech: text, subSections: [] };
 			}
 		} else if (cls.includes("mw-heading4")) {
 			const text = headingText(el);
 			if (META_H4_EN_NL.has(text)) {
-				// Meta-Abschnitt: Sub flushen, kein neuer Sub aus folgendem ul
+				// Meta section: Flush sub, do not create a new sub from the following ul
 				flushSub();
 			} else {
-				// Wortart auf heading4-Ebene
+				// Word type at heading4 level
 				flushPOS();
 				currentPOS = { partOfSpeech: text, subSections: [] };
 			}
 		} else if (cls.includes("mw-heading5")) {
-			// Sub-Label: immer flushen, dann nächstes ul als Inhalt
+			// Sub-label: always flush, then use the next ul as the content
 			flushSub();
 			if (currentPOS) {
 				const next = el.nextElementSibling;
@@ -394,10 +391,10 @@ function parseEN_NL(doc: Document, sectionName: string): PosBlock[] {
 
 // ── Parser ES ─────────────────────────────────────────────────────────────────
 //
-// heading3 = „Etimología N" (wird geflusht, kein POS)
-// heading4 = Wortart (z. B. „Sustantivo femenino")
-// dl > dd  = Definitionen (dt = Nummern, werden ignoriert)
-// verschachtelte ul in dd = werden entfernt
+// heading3 = „Etimología N" (flushed, no POS)
+// heading4 = Word type (e.g. „Sustantivo femenino")
+// dl > dd  = Definitions (dt = numbers, are ignored)
+// Nested ul tags within dd tags = will be removed
 
 function parseES(doc: Document): PosBlock[] {
 	const blockStart = findBlockStart(doc, "Español");
@@ -435,7 +432,7 @@ function parseES(doc: Document): PosBlock[] {
 			}
 		} else if (currentPOS && tag === "dl") {
 			if (!currentSub) currentSub = { label: null, items: [] };
-			const newItems = dlItems(el); // dlItems entfernt bereits verschachtelte Listen
+			const newItems = dlItems(el);
 			for (let i = 0; i < newItems.length; i++) currentSub.items.push(newItems[i]);
 		}
 
@@ -555,7 +552,7 @@ class WiktionarySidebarView extends ItemView {
 	}
 }
 
-// ── Einstellungen ─────────────────────────────────────────────────────────────
+// ── Settings ─────────────────────────────────────────────────────────────
 
 class WiktionarySettingTab extends PluginSettingTab {
 	private plugin: WiktionaryPlugin;
@@ -589,7 +586,7 @@ class WiktionarySettingTab extends PluginSettingTab {
 	}
 }
 
-// ── Haupt-Plugin-Klasse ───────────────────────────────────────────────────────
+// ── Main plugin class ───────────────────────────────────────────────────────
 
 export default class WiktionaryPlugin extends Plugin {
 	settings!: WiktionarySettings;

@@ -37,12 +37,12 @@ jobs:
 
       # 5. Artifact Attestation für main.js und styles.css
       - name: Attest main.js
-        uses: actions/attest-build-provenance@v1
+        uses: actions/attest-build-provenance@v2
         with:
           subject-path: main.js
 
       - name: Attest styles.css
-        uses: actions/attest-build-provenance@v1
+        uses: actions/attest-build-provenance@v2
         with:
           subject-path: styles.css
 

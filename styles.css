@@ -1,0 +1,111 @@
+/* ─────────────────────────────────────────────────
+   Wiktionary Sidebar – styles.css
+   Nutzt Obsidians CSS-Variablen für Theme-Kompatibilität
+   ───────────────────────────────────────────────── */
+
+.wiktionary-container {
+    padding: 12px 14px;
+    font-size: var(--font-ui-small);
+    line-height: 1.55;
+}
+
+.wiktionary-placeholder,
+.wiktionary-loading {
+    color: var(--text-muted);
+    font-style: italic;
+    margin-top: 16px;
+    text-align: center;
+}
+
+.wiktionary-header {
+    margin-bottom: 12px;
+    border-bottom: 1px solid var(--background-modifier-border);
+    padding-bottom: 8px;
+}
+
+.wiktionary-word {
+    font-size: 1.4em;
+    font-weight: 700;
+    margin: 0;
+    color: var(--text-normal);
+    letter-spacing: -0.01em;
+}
+
+.wiktionary-lang-block {
+    margin-bottom: 18px;
+}
+
+.wiktionary-lang-title {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.wiktionary-lang-label {
+    font-size: var(--font-ui-small);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-accent);
+}
+
+.wiktionary-lang-link {
+    font-size: 0.8em;
+    color: var(--text-muted);
+    text-decoration: none;
+}
+
+.wiktionary-lang-link:hover {
+    color: var(--text-accent);
+    text-decoration: underline;
+}
+
+.wiktionary-not-found {
+    color: var(--text-muted);
+    font-style: italic;
+    margin: 0;
+}
+
+.wiktionary-pos-block {
+    margin-bottom: 12px;
+}
+
+.wiktionary-pos {
+    font-size: 0.95em;
+    font-weight: 600;
+    color: var(--text-normal);
+    margin: 0 0 6px 0;
+    padding-bottom: 2px;
+    border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.wiktionary-subsection {
+    margin-bottom: 8px;
+}
+
+.wiktionary-sublabel {
+    font-size: 0.8em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    margin: 0 0 3px 0;
+}
+
+.wiktionary-defs {
+    margin: 0;
+    padding-left: 18px;
+}
+
+.wiktionary-defs li {
+    margin-bottom: 3px;
+    color: var(--text-normal);
+}
+
+.wiktionary-no-defs {
+    color: var(--text-faint);
+    font-style: italic;
+    margin: 0;
+    font-size: 0.9em;
+}

@@ -1,0 +1,15 @@
+{
+  "contextMenu": "Wiktionary: \u201e{{word}}\u201c",
+  "placeholder": "Select text and right-click to look up a word.",
+  "loading": "Loading entries for \u201e{{word}}\u201c \u2026",
+  "notFound": "No entry found.",
+  "noLangEntry": "No {{lang}} entry available.",
+  "noEntries": "(No entries found)",
+  "allDisabled": "All languages are disabled. Please check settings.",
+  "copy": "Copy",
+  "settings": {
+    "title": "Wiktionary Sidebar",
+    "desc": "Each language is fetched from its own native Wiktionary edition.",
+    "toggleDesc": "{{lang}}.wiktionary.org"
+  }
+}

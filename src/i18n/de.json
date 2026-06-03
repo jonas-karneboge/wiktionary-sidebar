@@ -1,0 +1,15 @@
+{
+  "contextMenu": "Wiktionary: \u201e{{word}}\u201c",
+  "placeholder": "Text markieren und per Rechtsklick nachschlagen.",
+  "loading": "Lade Eintr\u00e4ge f\u00fcr \u201e{{word}}\u201c \u2026",
+  "notFound": "Kein Eintrag gefunden.",
+  "noLangEntry": "Kein {{lang}}-Eintrag vorhanden.",
+  "noEntries": "(Keine Eintr\u00e4ge gefunden)",
+  "allDisabled": "Alle Sprachen sind deaktiviert. Bitte Einstellungen pr\u00fcfen.",
+  "copy": "Kopieren",
+  "settings": {
+    "title": "Wiktionary Sidebar \u2013 Einstellungen",
+    "desc": "Jede Sprache wird \u00fcber ihre native Wiktionary-Edition abgerufen.",
+    "toggleDesc": "{{lang}}.wiktionary.org"
+  }
+}

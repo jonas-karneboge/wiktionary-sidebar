@@ -1,6 +1,6 @@
 {
   "name": "wiktionary-sidebar",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Obsidian plugin: Wiktionary lookup in a sidebar",
   "main": "main.js",
   "scripts": {

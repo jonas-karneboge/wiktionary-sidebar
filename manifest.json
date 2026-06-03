@@ -1,7 +1,7 @@
 {
   "id": "wiktionary-sidebar",
   "name": "Wiktionary Sidebar",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "minAppVersion": "0.15.0",
   "description": "Right-click any selected word to look it up in Wiktionary. Works in editor and reading view. Shows definitions, etymology, synonyms and more for German, English, French, Italian, Swedish, Dutch, and Spanish — each from its native Wiktionary edition.",
   "author": "Jonas Karneboge",

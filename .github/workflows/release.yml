@@ -8,7 +8,8 @@ on:
 
 permissions:
   contents: write      # Release erstellen und Assets hochladen
-  id-token:  write     # Artifact Attestation
+  id-token: write      # OIDC Token für Attestation
+  attestations: write  # Attestation speichern
 
 jobs:
   build-and-release:
@@ -49,9 +50,7 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          # Tag-Name wird automatisch als Release-Name verwendet
           name: ${{ github.ref_name }}
-          # Release-Notes aus dem Tag-Message oder leer lassen
           generate_release_notes: true
           files: |
             main.js

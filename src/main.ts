@@ -98,7 +98,7 @@ function headingText(el: Element): string {
 }
 
 function stripLineNumbers(text: string): string {
-	return text.replace(/^\s*(\[\d+\]\s*)+/, "").trim();
+	return text.replace(/^\s*(\[\d+]\s*)+/, "").trim();
 }
 
 function cleanText(el: Element, removeNested = false): string {
@@ -508,7 +508,7 @@ class WiktionarySidebarView extends ItemView {
 		const c = this.container();
 		c.empty(); c.addClass("wiktionary-container");
 		c.createEl("div", { cls: "wiktionary-header" })
-		 .createEl("h2", { cls: "wiktionary-word", text: word });
+			.createEl("h2", { cls: "wiktionary-word", text: word });
 
 		if (activeLangs.length === 0) {
 			c.createEl("p", { cls: "wiktionary-placeholder", text: t("allDisabled") });
@@ -607,7 +607,7 @@ export default class WiktionaryPlugin extends Plugin {
 					if (!word) return;
 					menu.addItem((item) =>
 						item.setTitle(t("contextMenu", { word })).setIcon("book-open")
-						    .onClick(() => this.openSidebarAndLookup(word))
+							.onClick(() => this.openSidebarAndLookup(word))
 					);
 				}
 			)
@@ -624,11 +624,11 @@ export default class WiktionaryPlugin extends Plugin {
 			evt.preventDefault();
 			const menu = new Menu();
 			menu.addItem((item) => item.setTitle(t("copy")).setIcon("copy")
-			    .onClick(() => navigator.clipboard.writeText(selectedText)));
+				.onClick(() => navigator.clipboard.writeText(selectedText)));
 			menu.addSeparator();
 			menu.addItem((item) =>
 				item.setTitle(t("contextMenu", { word })).setIcon("book-open")
-				    .onClick(() => this.openSidebarAndLookup(word))
+					.onClick(() => this.openSidebarAndLookup(word))
 			);
 			menu.showAtMouseEvent(evt);
 		});
@@ -640,7 +640,7 @@ export default class WiktionaryPlugin extends Plugin {
 
 	async openSidebarAndLookup(word: string): Promise<void> {
 		const { workspace } = this.app;
-		let leaf: WorkspaceLeaf | null = null;
+		let leaf: WorkspaceLeaf | null;
 		const existing = workspace.getLeavesOfType(VIEW_TYPE);
 		if (existing.length > 0) {
 			leaf = existing[0];

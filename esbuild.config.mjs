@@ -1,11 +1,17 @@
 import esbuild from "esbuild";
 import process from "process";
-import builtins from "builtin-modules";
+import { createRequire } from "module";
+import { fileURLToPath } from "url";
+import { dirname, resolve } from "path";
 
 const prod = process.argv[2] === "production";
+const dir = dirname(fileURLToPath(import.meta.url));
+
+// Node.js built-in modules — inline statt builtin-modules-Paket
+const builtins = createRequire(import.meta.url)("module").builtinModules;
 
 const context = await esbuild.context({
-	entryPoints: ["src/main.ts"],
+	entryPoints: [resolve(dir, "src/main.ts")],
 	bundle: true,
 	external: [
 		"obsidian",
@@ -28,7 +34,7 @@ const context = await esbuild.context({
 	logLevel: "info",
 	sourcemap: prod ? false : "inline",
 	treeShaking: true,
-	outfile: "main.js",
+	outfile: resolve(dir, "main.js"),
 });
 
 if (prod) {
